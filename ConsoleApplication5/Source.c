@@ -37,7 +37,52 @@ void insertNodeToTail(List* lst, ListNode* newTail);
 Comp *createComp(int data, List *listComp);
 void createGroup(Comp *comp, List *nagishList, int iComp);
 void makeAllCompWhiteAgain(Comp *comp, int compSize);
+void printCompNet(Comp *compNet, int numOfComp);
+void printCompNetNagish(Comp *compNetNagish, int numOfComp);
+void sortCompNet(Comp *compNet, int numOfComp);
 
+
+void sortCompNet(Comp *compNet, int numOfComp)
+{
+	int i = 0;
+	for (i = 0; i < numOfComp; i++)
+	{
+		sortList(&compNet[i].listComp);
+	}
+}
+void printCompNetNagish(Comp *compNetNagish, int numOfComp)
+{
+	int i = 0;
+	ListNode *tmpForPrint;
+
+	for (i = 0; i < numOfComp; ++i)
+	{
+		tmpForPrint = compNetNagish[i].listComp.head;
+		printf("\n Negishim For comp num %d are:", compNetNagish[i].compNum);
+		while (tmpForPrint != NULL)
+		{
+			printf(" %d, ", tmpForPrint->compNum);
+			tmpForPrint = tmpForPrint->next;
+		}
+
+	}
+}
+void printCompNet(Comp *compNet, int numOfComp)
+{
+	int i = 0;
+	ListNode *tmpForPrint;
+
+	for (i = 0; i < numOfComp; ++i)
+	{
+		tmpForPrint = compNet[i].listComp.head;
+		while (tmpForPrint != NULL)
+		{
+			printf(" %d -> %d , \n", compNet[i].compNum, tmpForPrint->compNum);
+			tmpForPrint = tmpForPrint->next;
+		}
+
+	}
+}
 void makeAllCompWhiteAgain(Comp *comp, int compSize)
 {
 	int i = 0;
@@ -50,6 +95,7 @@ void createGroup(Comp *comp, List *nagishList, Comp xComp)
 {
 	//variables declaration
 	ListNode *tmpNode, *tmpPtr;
+	
 	//stopping condition
 	if (xComp.color == BLUE )
 	{
@@ -57,20 +103,22 @@ void createGroup(Comp *comp, List *nagishList, Comp xComp)
 	}
 	else
 	{
-		//points to the head of the input list
-		tmpPtr = comp[xComp.compNum - 1].listComp.head;
-		//creates new node and colores it in BLUE
+		//changes xComp to color BLUE
+		xComp.color = BLUE;
+		//creates new node (with the xComp Number) and colores it in BLUE
 		tmpNode = createNode(xComp.compNum, NULL);
-
 		//insert the new node to the tail of the input list
 		insertNodeToTail(nagishList, tmpNode);
+		
+		//points to the head of the input list (the first ListNode of the relevant comp)
+		tmpPtr = comp[xComp.compNum - 1].listComp.head;
 
 		//runs on the relevant list
 		while (tmpPtr != NULL)
 		{
-			if (comp[tmpPtr->compNum].color == WHITE)
+			if (comp[tmpPtr->compNum-1].color == WHITE)
 			{
-				createGroup(&comp[tmpPtr->compNum], nagishList, comp[tmpPtr->compNum]);
+				createGroup(comp, nagishList, comp[tmpPtr->compNum-1]);
 			}
 			tmpPtr = tmpPtr->next;
 		}
@@ -206,13 +254,13 @@ void sortList (List *lst)
 void main()
 {
 	int numOfComp, i;
+
+	//need to ask Iris how to create string with no limit and use gets
 	char inputString[100];
 	int *arrOfLinkedComp;
 	int stringLen;
 	Comp *compNet;
 	Comp *compNetNagish;
-
-	ListNode *tmpForPrint;
 
 	printf("Typethe number of computers in the network\n");
 	scanf("%d", &numOfComp);
@@ -228,24 +276,11 @@ void main()
 	
 	linkedList(arrOfLinkedComp, stringLen, compNet);
 
-	for (i = 0; i < numOfComp; i++)
-	{
-		sortList(&compNet[i].listComp);
-	}
-
+	//sorts compNet
+	sortCompNet(compNet, numOfComp);
 
 	//prints the network - compNet
-	
-	for (i = 0; i < numOfComp; ++i)
-	{
-		tmpForPrint = compNet[i].listComp.head;
-		while (tmpForPrint != NULL)
-		{
-			printf(" %d -> %d , \n", compNet[i].compNum, tmpForPrint->compNum);
-			tmpForPrint = tmpForPrint->next;
-		}
-		
-	}
+	printCompNet(compNet, numOfComp);
 	
 	//creates emptycompNetNagish array
 	compNetNagish = makeCompNet(numOfComp);
@@ -254,7 +289,7 @@ void main()
 	for (i = 0; i < numOfComp; i++)
 	{
 		createGroup(compNet, &compNetNagish[i].listComp, compNet[i]);
-		makeAllCompWhiteAgain(compNet, numOfComp);
+		//makeAllCompWhiteAgain(compNet, numOfComp);
 	}
 
 	//sort the compNetNagish
@@ -264,17 +299,7 @@ void main()
 	}*/
 
 	//prints the Negishim group of each comp
+	printCompNetNagish(compNetNagish, numOfComp);
 
-	for (i = 0; i < numOfComp; ++i)
-	{
-		tmpForPrint = compNetNagish[i].listComp.head;
-		printf("\n Negishim For comp num %d are:", compNetNagish[i].compNum);
-		while (tmpForPrint != NULL)
-		{
-			printf(" %d, ",tmpForPrint->compNum);
-			tmpForPrint = tmpForPrint->next;
-		}
-
-	}
 
 }
