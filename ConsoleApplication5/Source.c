@@ -24,7 +24,7 @@ typedef struct  comp
 	List listComp;
 }Comp;
 
-void SortList(List *lst);
+void sortList(List *lst);
 int cmpfunc(const void * a, const void * b);
 int *strToArr(char *string);
 void linkedList(int *arr, int arrSize, Comp *compNet);
@@ -35,13 +35,23 @@ ListNode* createNode(void * data, ListNode* next);
 void insertNodeToHead(List* lst, ListNode* newHead);
 void insertNodeToTail(List* lst, ListNode* newTail);
 Comp *createComp(int data, List *listComp);
-void createGroup(Comp *comp, List *nagishList, int iComp);
+void createGroup(Comp *comp, List *nagishList, Comp xComp);
+//void createGroup(Comp **comp, List *nagishList, Comp *xComp);
 void makeAllCompWhiteAgain(Comp *comp, int compSize);
 void printCompNet(Comp *compNet, int numOfComp);
 void printCompNetNagish(Comp *compNetNagish, int numOfComp);
 void sortCompNet(Comp *compNet, int numOfComp);
+void createCompNagishList(Comp *compNet, Comp *compNetNagish, int numOfComp);
 
-
+/*void createCompNagishList(Comp *compNet, Comp *compNetNagish, int numOfComp)
+{
+	int i = 0;
+	for (i = 0; i < numOfComp; i++)
+	{
+		createGroup(compNet, &compNetNagish[i].listComp, compNet[i]);
+		//makeAllCompWhiteAgain(compNet, numOfComp);
+	}
+}*/
 void sortCompNet(Comp *compNet, int numOfComp)
 {
 	int i = 0;
@@ -95,23 +105,27 @@ void createGroup(Comp *comp, List *nagishList, Comp xComp)
 {
 	//variables declaration
 	ListNode *tmpNode, *tmpPtr;
-	
+	printf("The color is %d (1=BLUE, 0=WHITE)\n", xComp.color);
+
 	//stopping condition
-	if (xComp.color == BLUE )
+	if (comp[xComp.compNum -1].color == BLUE )
 	{
-		return;
+		printf("@@@stop condition@@@\n");
+		return 0;
 	}
 	else
 	{
+		
 		//changes xComp to color BLUE
-		xComp.color = BLUE;
+		comp[xComp.compNum -1].color = BLUE;
+		printf("NEW!!! color is %d (1=BLUE, 0=WHITE)\n", xComp.color);
 		//creates new node (with the xComp Number) and colores it in BLUE
 		tmpNode = createNode(xComp.compNum, NULL);
 		//insert the new node to the tail of the input list
 		insertNodeToTail(nagishList, tmpNode);
 		
 		//points to the head of the input list (the first ListNode of the relevant comp)
-		tmpPtr = comp[xComp.compNum - 1].listComp.head;
+		tmpPtr = xComp.listComp.head;
 
 		//runs on the relevant list
 		while (tmpPtr != NULL)
@@ -226,7 +240,7 @@ void sortList (List *lst)
 	ListNode *ptrHeadLst;
 	ptrToLst = ptrHeadLst = lst->head;
 	
-	int arr[100];
+	int arr[10000];
 	int i = 0;
 	int arrSize;
 	//gos on all 
@@ -243,6 +257,7 @@ void sortList (List *lst)
 	//sorting the array with qsort
 	qsort(arr, arrSize, sizeof(int), cmpfunc);
 
+	//puts the data from the sorted array back into the list
 	for (i = 0; i < arrSize; i++)
 	{
 		ptrHeadLst->compNum = arr[i];
@@ -256,7 +271,7 @@ void main()
 	int numOfComp, i;
 
 	//need to ask Iris how to create string with no limit and use gets
-	char inputString[100];
+	char inputString[10000];
 	int *arrOfLinkedComp;
 	int stringLen;
 	Comp *compNet;
@@ -277,20 +292,30 @@ void main()
 	linkedList(arrOfLinkedComp, stringLen, compNet);
 
 	//sorts compNet
-	sortCompNet(compNet, numOfComp);
+	for (i = 0; i < numOfComp; i++)
+	{
+		sortList(&compNet[i].listComp);
+	}
+
+	//tries from function - need to fix
+	//sortCompNet(compNet, numOfComp);
 
 	//prints the network - compNet
 	printCompNet(compNet, numOfComp);
 	
+	
 	//creates emptycompNetNagish array
 	compNetNagish = makeCompNet(numOfComp);
-
+	
 	//goes over compNet and create the Negishim Group for each comp in compNetNagish
 	for (i = 0; i < numOfComp; i++)
 	{
+		printf("####### - line num %d\n", i);
 		createGroup(compNet, &compNetNagish[i].listComp, compNet[i]);
-		//makeAllCompWhiteAgain(compNet, numOfComp);
+		makeAllCompWhiteAgain(compNet, numOfComp);
 	}
+	//tryies from function - need to fix
+	//createCompNagishList(compNet, compNetNagish, numOfComp);
 
 	//sort the compNetNagish
 	/*for (i = 0; i < numOfComp; i++)
